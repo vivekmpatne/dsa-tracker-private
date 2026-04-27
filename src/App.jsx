@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const API = "http://localhost:4000"; // change to your deployed backend URL
+const API = "http://localhost:5000"; // change to your deployed backend URL
 
 // ─── MASTER DATA (correct phase 1 targets) ───────────────────────────────────
 const TOPICS = [
@@ -109,7 +109,7 @@ function AuthModal({onAuth}){
     if(!email||!pass){setErr("Email and password required");return;}
     setBusy(true);setErr("");
     try{
-      const res = await fetch(`${API}/${mode}`,{
+      const res = await fetch(`${API}/api/auth/${mode}`,{
         method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({email,password:pass})
       });
@@ -213,7 +213,7 @@ export default function App(){
   // ── Fetch from backend on login ──
   useEffect(()=>{
     if(!token) return;
-    apiFetch("/progress").then(data=>{
+    apiFetch("/api/progress").then(data=>{
       if(!data) return;
       const remote = data.progress;
       // Conflict: last update wins
@@ -236,7 +236,7 @@ export default function App(){
     syncTimer.current = setTimeout(async()=>{
       setSyncing(true);
       const ts = Date.now();
-      await apiFetch("/progress",{
+      await apiFetch("/api/progress",{
         method:"POST",
         body:JSON.stringify({
           weeklyData:weekly,topics:topicD,mernMod,dayTypes:dayT,
@@ -260,7 +260,7 @@ export default function App(){
   }
   async function syncNow(){
     if(!token)return;setSyncing(true);
-    const data = await apiFetch("/progress").catch(()=>null);
+    const data = await apiFetch("/api/progress").catch(()=>null);
     if(data?.progress){
       const remote=data.progress;
       if(remote.weeklyData) setWeekly(remote.weeklyData);
