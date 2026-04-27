@@ -353,7 +353,7 @@ export default function App(){
       <input ref={impRef} type="file" accept=".json" onChange={importData} style={{display:"none"}}/>
 
       {/* Header */}
-      <div style={{background:"linear-gradient(180deg,#0f0f24,#08080f)",borderBottom:"1px solid #1e1e3f",padding:"16px 16px 12px"}}>
+      <div style={{background:"linear-gradient(180deg,#0f0f24,#08080f)", borderBottom:"1px solid #1e1e3f",padding:"16px 16px 12px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
             <div style={{fontSize:9,color:"#404068",letterSpacing:"0.3em",marginBottom:4,textTransform:"uppercase"}}>
@@ -432,7 +432,7 @@ export default function App(){
             {/* Day type */}
             <div style={{...C,marginBottom:12}}>
               <div style={SB}>DAY TYPE</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              <div style={{display:"flex",  justifyContent:"center", gap:6,flexWrap:"wrap"}}>
                 {DAY_TYPES.map(dt=>(
                   <button key={dt.id} onClick={()=>updDayType(todayK,dt.id)} style={{
                     padding:"5px 10px",borderRadius:8,cursor:"pointer",fontFamily:"inherit",
