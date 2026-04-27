@@ -399,7 +399,7 @@ export default function App(){
       </div>
 
       {/* Tabs */}
-      <div style={{display:"flex",overflowX:"auto",gap:5,padding:"8px 12px",borderBottom:"1px solid #1e1e3f",scrollbarWidth:"none"}}>
+      <div style={{display:"flex", justifyContent:"center",overflowX:"auto",gap:5,padding:"8px 12px",borderBottom:"1px solid #1e1e3f",scrollbarWidth:"none"}}>
         {TABS.map((t,i)=>(
           <button key={i} onClick={()=>setTab(i)} style={{flexShrink:0,padding:"5px 11px",borderRadius:8,cursor:"pointer",
             border:tab===i?"1px solid #38bdf8":"1px solid #1e1e3f",background:tab===i?"#0c1a2e":"#0e0e1a",
