@@ -1,10 +1,4 @@
-const BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://dsa-tracker-private.onrender.com";
-
-console.log("🔥 BASE_URL:", BASE_URL);
-
-
+const BASE_URL = "https://dsa-tracker-private.onrender.com";
 
 export const API = {
   register: (data) =>
@@ -21,16 +15,14 @@ export const API = {
       body: JSON.stringify(data),
     }).then(res => res.json()),
 
-  // ✅ FIXED
   saveProgress: (data) =>
-    fetch(`${BASE_URL}/api/progress/save`, {
+    fetch(`${BASE_URL}/progress/save`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     }).then(res => res.json()),
 
-  // ✅ FIXED
   loadProgress: (userId) =>
-    fetch(`${BASE_URL}/api/progress/${userId}`)
+    fetch(`${BASE_URL}/progress/${userId}`)
       .then(res => res.json()),
 };
