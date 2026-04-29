@@ -1,4 +1,5 @@
 const BASE_URL = "https://dsa-tracker-private.onrender.com";
+console.log("🔥 BASE_URL:", BASE_URL);
 
 export const API = {
   register: (data) =>
