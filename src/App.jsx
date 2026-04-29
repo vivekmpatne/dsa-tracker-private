@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const API = "http://localhost:5000"; // change to your deployed backend URL
+// change to your deployed backend URL
+import { API } from "./app";
+
 
 // ─── MASTER DATA (correct phase 1 targets) ───────────────────────────────────
 const TOPICS = [
