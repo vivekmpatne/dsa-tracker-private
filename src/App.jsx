@@ -110,44 +110,37 @@ function AuthModal({onAuth}){
   // Inside AuthModal component — replace the entire submit function
 
 async function submit() {
-  if (!email || !pass) { setErr("Email and password required"); return; }
+  if (!email || !pass) {
+    setErr("Email and password required");
+    return;
+  }
+
   setBusy(true);
   setErr("");
 
   try {
-    // FIX: use API.login() / API.register() — NOT fetch(`${API}/...`)
-    // API is an object; `${API}` would produce "[object Object]"
-    const res = mode === "login"
-      ? await API.login({ email: email.trim(), password: pass })
-      : await API.register({ email: email.trim(), password: pass });
+    const data =
+      mode === "login"
+        ? await API.login({ email: email.trim(), password: pass })
+        : await API.register({ email: email.trim(), password: pass });
 
-    // Always parse JSON first
-    const data = await res.json();
+    // ❌ NO res.json() anymore
 
-    if (!res.ok) {
-      // Backend returned 4xx/5xx — show exact backend message
+    if (!data.token) {
       setErr(data.message || data.error || "Something went wrong");
       setBusy(false);
       return;
     }
 
-    // FIX: backend returns { token, email, userId } — read flat shape
-    if (!data.token) {
-      setErr("No token received. Contact support.");
-      setBusy(false);
-      return;
-    }
-
-    // Success — pass token + email up
+    // success
     onAuth(data.token, data.email, data.userId);
 
   } catch (err) {
-    // Only reaches here if network is TRULY down (DNS fail, no internet)
-    // NOT for 4xx/5xx — those are handled above
-    console.error("Auth fetch error:", err);
+    console.error("Auth error:", err);
     setErr("Cannot reach server. Check your internet connection.");
-    setBusy(false);
   }
+
+  setBusy(false);
 }
  
   const C2="#0e0e1a",BD="1px solid #1e1e3f";
@@ -241,42 +234,6 @@ export default function App(){
   useEffect(()=>{localStorage.setItem("dsa_dayt",    JSON.stringify(dayT));},    [dayT]);
   useEffect(()=>{localStorage.setItem("dsa_mern_mod",JSON.stringify(mernMod));}, [mernMod]);
 
-  // ── API helpers ──
-  // after login testing , this removing apiFetch and replacing with direct API calls in useEffect and saveToBackend
-
-  // const apiFetch = useCallback(async(path,opts={})=>{
-  //   // 2nd apr fetch fun replace with API object methods ( one line )
-  //   const res = await fetch(`https://dsa-tracker-private.onrender.com${path}`,{
-  //     ...opts,
-  //     headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`,...(opts.headers||{})}
-  //   });
-  //   if(res.status===401){setToken(null);setUE(null);localStorage.removeItem("kk_token");localStorage.removeItem("kk_email");return null;}
-  //   return res.json();
-  // },[token]);
-
-
-  // ── Fetch from backend on login ──
-
-  //This is your load-after-login place
-
-  // useEffect(()=>{
-  //   if(!token) return;
-  //   // 2nd apr replace with API.loadProgress
-  //   API.loadProgress(userId).then(data=>{
-  //     if(!data) return;
-  //     const remote = data.progress;
-  //     // Conflict: last update wins
-  //     const localTs = parseInt(localStorage.getItem("kk_local_ts")||"0");
-  //     const remoteTs = new Date(remote?.lastUpdated||0).getTime();
-  //     if(remoteTs>localTs){
-  //       if(remote.weeklyData)  setWeekly(remote.weeklyData);
-  //       if(remote.topics)      setTopicD(remote.topics);
-  //       if(remote.mernMod)     setMernMod(remote.mernMod);
-  //       if(remote.dayTypes)    setDayT(remote.dayTypes);
-  //     }
-  //     setLastSync(new Date());
-  //   }).catch(()=>{});
-  // },[token]);
 
 
   useEffect(() => {
