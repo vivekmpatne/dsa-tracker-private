@@ -17,6 +17,11 @@ export const API = {
   // PROGRESS
   saveProgress: (data, token) => json("POST", "/api/progress/save", data, token),
   loadProgress: (uid,  token) => json("GET",  `/api/progress/${uid}`, null, token),
+
+  // LEGACY (to be removed) adding after work of login and progress save/load is done, to avoid merge conflicts
+   getProgress: (userId) =>
+    fetch(`${BASE}/api/progress/${userId}`)
+      .then(res => res.json()),
 };
 
 

@@ -199,6 +199,9 @@ async function submit() {
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 export default function App(){
+
+
+
   const now    = new Date();
   const todayK = ds(now);
   const impRef = useRef();
@@ -212,6 +215,18 @@ export default function App(){
   const [userEmail,setUE]   = useState(()=>localStorage.getItem("kk_email")||null);
 
   const userId = userEmail; // email is your userId
+
+  // adding this function to App.jsx to handle auth and pass to AuthModal, after login testing and before cleanup and merge of auth modal PR, to avoid conflicts
+  useEffect(() => {
+  const token = localStorage.getItem("kk_token");
+  const email = localStorage.getItem("kk_email");
+
+  if (token) {
+    setToken(token);
+    setUE(email);
+  }
+}, []);
+
 
   const [showAuth,setShowAuth] = useState(false);
   const [lastSync,setLastSync] = useState(null);
@@ -231,35 +246,59 @@ export default function App(){
   useEffect(()=>{localStorage.setItem("dsa_mern_mod",JSON.stringify(mernMod));}, [mernMod]);
 
   // ── API helpers ──
-  const apiFetch = useCallback(async(path,opts={})=>{
-    // 2nd apr fetch fun replace with API object methods ( one line )
-    const res = await fetch(`https://dsa-tracker-private.onrender.com${path}`,{
-      ...opts,
-      headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`,...(opts.headers||{})}
-    });
-    if(res.status===401){setToken(null);setUE(null);localStorage.removeItem("kk_token");localStorage.removeItem("kk_email");return null;}
-    return res.json();
-  },[token]);
+  // after login testing , this removing apiFetch and replacing with direct API calls in useEffect and saveToBackend
+
+  // const apiFetch = useCallback(async(path,opts={})=>{
+  //   // 2nd apr fetch fun replace with API object methods ( one line )
+  //   const res = await fetch(`https://dsa-tracker-private.onrender.com${path}`,{
+  //     ...opts,
+  //     headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`,...(opts.headers||{})}
+  //   });
+  //   if(res.status===401){setToken(null);setUE(null);localStorage.removeItem("kk_token");localStorage.removeItem("kk_email");return null;}
+  //   return res.json();
+  // },[token]);
+
 
   // ── Fetch from backend on login ──
-  useEffect(()=>{
-    if(!token) return;
-    // 2nd apr replace with API.loadProgress
-    API.loadProgress(userId).then(data=>{
-      if(!data) return;
-      const remote = data.progress;
-      // Conflict: last update wins
-      const localTs = parseInt(localStorage.getItem("kk_local_ts")||"0");
-      const remoteTs = new Date(remote?.lastUpdated||0).getTime();
-      if(remoteTs>localTs){
-        if(remote.weeklyData)  setWeekly(remote.weeklyData);
-        if(remote.topics)      setTopicD(remote.topics);
-        if(remote.mernMod)     setMernMod(remote.mernMod);
-        if(remote.dayTypes)    setDayT(remote.dayTypes);
-      }
-      setLastSync(new Date());
-    }).catch(()=>{});
-  },[token]);
+
+  //This is your load-after-login place
+
+  // useEffect(()=>{
+  //   if(!token) return;
+  //   // 2nd apr replace with API.loadProgress
+  //   API.loadProgress(userId).then(data=>{
+  //     if(!data) return;
+  //     const remote = data.progress;
+  //     // Conflict: last update wins
+  //     const localTs = parseInt(localStorage.getItem("kk_local_ts")||"0");
+  //     const remoteTs = new Date(remote?.lastUpdated||0).getTime();
+  //     if(remoteTs>localTs){
+  //       if(remote.weeklyData)  setWeekly(remote.weeklyData);
+  //       if(remote.topics)      setTopicD(remote.topics);
+  //       if(remote.mernMod)     setMernMod(remote.mernMod);
+  //       if(remote.dayTypes)    setDayT(remote.dayTypes);
+  //     }
+  //     setLastSync(new Date());
+  //   }).catch(()=>{});
+  // },[token]);
+
+
+
+  useEffect(() => {
+  if (!token) return;
+
+  API.getProgress(userEmail)
+    .then((data) => {
+      if (!data) return;
+
+      if (data.weeklyData) setWeekly(data.weeklyData);
+      if (data.topics) setTopicD(data.topics);
+      if (data.mernMod) setMernMod(data.mernMod);
+      if (data.dayTypes) setDayT(data.dayTypes);
+    })
+    .catch(() => {});
+  }, [token]);
+
 
   // ── Debounced auto-save to backend ──
   const saveToBackend = useCallback(()=>{

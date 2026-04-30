@@ -14,25 +14,38 @@ router.post("/", async (req, res) => {
 // ─── YOUR EXISTING CODE ───
 
 // SAVE
-router.post("/save", async (req, res) => {
-  const { userId, data } = req.body;
+router.post("/", async (req, res) => {
+  try {
+    const { userId, data } = req.body;
 
-  let existing = await Progress.findOne({ userId });
+    let existing = await Progress.findOne({ userId });
 
-  if (existing) {
-    existing.data = data;
-    await existing.save();
-  } else {
-    await Progress.create({ userId, data });
+    if (existing) {
+      existing.data = data;
+      await existing.save();
+    } else {
+      await Progress.create({ userId, data });
+    }
+
+    res.json({ message: "Saved" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error saving progress" });
   }
-
-  res.json({ message: "Saved" });
 });
 
 // LOAD
 router.get("/:userId", async (req, res) => {
-  const progress = await Progress.findOne({ userId: req.params.userId });
-  res.json(progress?.data || {});
+  try {
+    const progress = await Progress.findOne({ userId: req.params.userId });
+
+    res.json(progress?.data || {});
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error loading progress" });
+  }
 });
 
 module.exports = router;
