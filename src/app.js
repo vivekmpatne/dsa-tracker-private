@@ -12,16 +12,15 @@ const json = (method, path, body, token) => fetch(`${BASE}${path}`, {
 
 export const API = {
   // AUTH
-  register:     (data)        => json("POST", "/api/auth/register", data),
-  login:        (data)        => json("POST", "/api/auth/login",    data),
-  // PROGRESS
-  saveProgress: (data, token) => json("POST", "/api/progress/save", data, token),
-  loadProgress: (uid,  token) => json("GET",  `/api/progress/${uid}`, null, token),
+  register: (data) => json("POST", "/api/auth/register", data),
+  login:    (data) => json("POST", "/api/auth/login", data),
 
-  // LEGACY (to be removed) adding after work of login and progress save/load is done, to avoid merge conflicts
-   getProgress: (userId) =>
-    fetch(`${BASE}/api/progress/${userId}`)
-      .then(res => res.json()),
+  // PROGRESS
+  saveProgress: (payload, token) =>
+    json("POST", "/api/progress", payload, token),   // ❗ FIXED (NO /save)
+
+  loadProgress: (userId, token) =>
+    json("GET", `/api/progress/${userId}`, null, token),
 };
 
 

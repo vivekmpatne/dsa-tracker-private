@@ -279,43 +279,50 @@ export default function App(){
   // },[token]);
 
 
-
-  useEffect(() => {
+useEffect(() => {
   if (!token) return;
 
-  API.getProgress(userEmail)
+  API.loadProgress(userEmail, token)   // ❗ use THIS (not getProgress)
     .then((data) => {
       if (!data) return;
 
-      if (data.weeklyData) setWeekly(data.weeklyData);
-      if (data.topics) setTopicD(data.topics);
-      if (data.mernMod) setMernMod(data.mernMod);
-      if (data.dayTypes) setDayT(data.dayTypes);
+      setWeekly(data.weeklyData || {});
+      setTopicD(data.topics || {});
+      setMernMod(data.mernMod || {});
+      setDayT(data.dayTypes || {});
     })
     .catch(() => {});
-  }, [token]);
-
+}, [token]);
 
   // ── Debounced auto-save to backend ──
-  const saveToBackend = useCallback(()=>{
-    if(!token) return;
-    clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(async()=>{
-      setSyncing(true);
-      const ts = Date.now();
+  const saveToBackend = useCallback(() => {
+  if (!token) return;
 
-      // 3rd apr replace with API.saveProgress
-      await API.saveProgress({
-        weeklyData:weekly,
-        topics:topicD,
+  clearTimeout(syncTimer.current);
+
+  syncTimer.current = setTimeout(async () => {
+    setSyncing(true);
+
+    const ts = Date.now();
+
+    await API.saveProgress({
+      userId: userEmail,
+      data: {
+        weeklyData: weekly,
+        topics: topicD,
         mernMod,
-        dayTypes:dayT,
-        lastUpdated:new Date(ts).toISOString()
-      }).catch(()=>{});
-      localStorage.setItem("kk_local_ts",String(ts));
-      setLastSync(new Date());setSyncing(false);
-      },2000);
-      },[token,weekly,topicD,mernMod,dayT]);
+        dayTypes: dayT,
+        lastUpdated: new Date(ts).toISOString()
+      }
+    }, token).catch(() => {});
+
+    localStorage.setItem("kk_local_ts", String(ts));
+    setLastSync(new Date());
+    setSyncing(false);
+
+  }, 2000);
+
+  }, [token, userEmail, weekly, topicD, mernMod, dayT]);
 
 
   useEffect(()=>{saveToBackend();},[weekly,topicD,mernMod,dayT]);

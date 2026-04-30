@@ -2,17 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Progress = require("../models/Progress");
 
-
-router.get("/", async (req, res) => {
-  res.json({ progress: {} });
-});
-
-router.post("/", async (req, res) => {
-  res.json({ message: "Saved" });
-});
-
-// ─── YOUR EXISTING CODE ───
-
 // SAVE
 router.post("/", async (req, res) => {
   try {
@@ -39,9 +28,7 @@ router.post("/", async (req, res) => {
 router.get("/:userId", async (req, res) => {
   try {
     const progress = await Progress.findOne({ userId: req.params.userId });
-
     res.json(progress?.data || {});
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error loading progress" });
