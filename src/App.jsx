@@ -107,33 +107,49 @@ function AuthModal({onAuth}){
   const [err,setErr]    = useState("");
   const [busy,setBusy]  = useState(false);
 
-  async function submit(){
-    if(!email||!pass){setErr("Email and password required");return;}
-    setBusy(true);setErr("");
-    try{
+  // Inside AuthModal component — replace the entire submit function
 
-      // done 1st replce of fetch 
-      const res = mode === "login"
-  ? await API.login({ email, password: pass })
-  : await API.register({ email, password: pass });
+async function submit() {
+  if (!email || !pass) { setErr("Email and password required"); return; }
+  setBusy(true);
+  setErr("");
 
-  const data = await res.json();
+  try {
+    // FIX: use API.login() / API.register() — NOT fetch(`${API}/...`)
+    // API is an object; `${API}` would produce "[object Object]"
+    const res = mode === "login"
+      ? await API.login({ email: email.trim(), password: pass })
+      : await API.register({ email: email.trim(), password: pass });
 
-  if (!res.ok) {
-  setErr(data.message || data.error || "Something went wrong");
-  setBusy(false);
-  return;
-  }
+    // Always parse JSON first
+    const data = await res.json();
 
-  onAuth(data.token, data.email);
-
-    }catch{
-      // Backend offline — allow offline mode
-      setErr("Backend offline. Continue in offline mode.");
+    if (!res.ok) {
+      // Backend returned 4xx/5xx — show exact backend message
+      setErr(data.message || data.error || "Something went wrong");
       setBusy(false);
+      return;
     }
-  }
 
+    // FIX: backend returns { token, email, userId } — read flat shape
+    if (!data.token) {
+      setErr("No token received. Contact support.");
+      setBusy(false);
+      return;
+    }
+
+    // Success — pass token + email up
+    onAuth(data.token, data.email, data.userId);
+
+  } catch (err) {
+    // Only reaches here if network is TRULY down (DNS fail, no internet)
+    // NOT for 4xx/5xx — those are handled above
+    console.error("Auth fetch error:", err);
+    setErr("Cannot reach server. Check your internet connection.");
+    setBusy(false);
+  }
+}
+ 
   const C2="#0e0e1a",BD="1px solid #1e1e3f";
   return(
     <div style={{position:"fixed",inset:0,background:"#08080fee",display:"flex",
@@ -269,13 +285,28 @@ export default function App(){
 
   useEffect(()=>{saveToBackend();},[weekly,topicD,mernMod,dayT]);
 
-  function handleAuth(tok,email){
-    setToken(tok);setUE(email);setShowAuth(false);
-    if(tok){localStorage.setItem("kk_token",tok);localStorage.setItem("kk_email",email);}
+  // function handleAuth(tok,email){
+  //   setToken(tok);setUE(email);setShowAuth(false);
+  //   if(tok){localStorage.setItem("kk_token",tok);localStorage.setItem("kk_email",email);}
+  // }
+
+  // Replace handleAuth in App.jsx main component
+
+function handleAuth(tok, email, userId) {
+  setToken(tok);
+  setUE(email);
+  setShowAuth(false);
+  if (tok) {
+    localStorage.setItem("kk_token",  tok);
+    localStorage.setItem("kk_email",  email);
+    // FIX: store userId separately for loadProgress API call
+    localStorage.setItem("kk_userId", userId || email);
   }
+}
+
   function logout(){
     setToken(null);setUE(null);
-    localStorage.removeItem("kk_token");localStorage.removeItem("kk_email");
+    localStorage.removeItem("kk_token");localStorage.removeItem("kk_email");localStorage.removeItem("kk_userId");
   }
   async function syncNow(){
     if(!token)return;setSyncing(true);
