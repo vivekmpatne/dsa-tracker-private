@@ -279,20 +279,20 @@ export default function App(){
   // },[token]);
 
 
-useEffect(() => {
+  useEffect(() => {
   if (!token) return;
 
-  API.loadProgress(userEmail, token)   // ❗ use THIS (not getProgress)
+  API.loadProgress(userEmail, token)
     .then((data) => {
       if (!data) return;
 
-      setWeekly(data.weeklyData || {});
-      setTopicD(data.topics || {});
-      setMernMod(data.mernMod || {});
-      setDayT(data.dayTypes || {});
+      if (data.weeklyData) setWeekly(data.weeklyData);
+      if (data.topics) setTopicD(data.topics);
+      if (data.mernMod) setMernMod(data.mernMod);
+      if (data.dayTypes) setDayT(data.dayTypes);
     })
     .catch(() => {});
-}, [token]);
+    }, [token, userEmail]);
 
   // ── Debounced auto-save to backend ──
   const saveToBackend = useCallback(() => {

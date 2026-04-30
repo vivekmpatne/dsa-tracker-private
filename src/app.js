@@ -1,14 +1,22 @@
 // src/app.js
 const BASE = import.meta.env.VITE_API_URL || "https://dsa-tracker-private.onrender.com";
 
-const json = (method, path, body, token) => fetch(`${BASE}${path}`, {
-  method,
-  headers: {
-    "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-  },
-  body: body ? JSON.stringify(body) : undefined,
-});
+const json = async (method, path, body, token) => {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) throw data || { message: "Request failed" };
+
+  return data;
+};
 
 export const API = {
   // AUTH
@@ -17,13 +25,11 @@ export const API = {
 
   // PROGRESS
   saveProgress: (payload, token) =>
-    json("POST", "/api/progress", payload, token),   // ❗ FIXED (NO /save)
+    json("POST", "/api/progress", payload, token),
 
   loadProgress: (userId, token) =>
     json("GET", `/api/progress/${userId}`, null, token),
 };
-
-
 
 // const BASE_URL = "https://dsa-tracker-private.onrender.com";
 // console.log("🔥 BASE_URL:", BASE_URL);
