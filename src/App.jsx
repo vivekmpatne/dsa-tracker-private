@@ -113,17 +113,19 @@ function AuthModal({onAuth}){
     try{
 
       // done 1st replce of fetch 
-      const data = await (mode === "login"
-      ? API.login({ email, password: pass })
-      : API.register({ email, password: pass })
-      );
+      const res = mode === "login"
+  ? await API.login({ email, password: pass })
+  : await API.register({ email, password: pass });
 
-      if (!res.ok) {
-       setErr(data.message || data.error || "Something went wrong");
-       setBusy(false);
-       return;
-      }
-      onAuth(data.token, data.email);
+  const data = await res.json();
+
+  if (!res.ok) {
+  setErr(data.message || data.error || "Something went wrong");
+  setBusy(false);
+  return;
+  }
+
+  onAuth(data.token, data.email);
 
     }catch{
       // Backend offline — allow offline mode
