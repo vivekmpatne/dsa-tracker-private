@@ -111,11 +111,13 @@ function AuthModal({onAuth}){
     if(!email||!pass){setErr("Email and password required");return;}
     setBusy(true);setErr("");
     try{
-      const res = await fetch(`${API}/api/auth/${mode}`,{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({email,password:pass})
-      });
-      const data = await res.json();
+
+      // done 1st replce of fetch 
+      const data = await (mode === "login"
+      ? API.login({ email, password: pass })
+      : API.register({ email, password: pass })
+      );
+
       if(!res.ok){setErr(data.message||"Error");setBusy(false);return;}
       onAuth(data.token, data.email);
     }catch{
@@ -185,6 +187,9 @@ export default function App(){
   // ── Auth ──
   const [token,  setToken]  = useState(()=>localStorage.getItem("kk_token")||null);
   const [userEmail,setUE]   = useState(()=>localStorage.getItem("kk_email")||null);
+
+  const userId = userEmail; // email is your userId
+
   const [showAuth,setShowAuth] = useState(false);
   const [lastSync,setLastSync] = useState(null);
   const [syncing,setSyncing]   = useState(false);
@@ -204,7 +209,8 @@ export default function App(){
 
   // ── API helpers ──
   const apiFetch = useCallback(async(path,opts={})=>{
-    const res = await fetch(`${API}${path}`,{
+    // 2nd apr fetch fun replace with API object methods ( one line )
+    const res = await fetch(`https://dsa-tracker-private.onrender.com${path}`,{
       ...opts,
       headers:{"Content-Type":"application/json","Authorization":`Bearer ${token}`,...(opts.headers||{})}
     });
@@ -215,7 +221,8 @@ export default function App(){
   // ── Fetch from backend on login ──
   useEffect(()=>{
     if(!token) return;
-    apiFetch("/api/progress").then(data=>{
+    // 2nd apr replace with API.loadProgress
+    API.loadProgress(userId).then(data=>{
       if(!data) return;
       const remote = data.progress;
       // Conflict: last update wins
@@ -238,17 +245,20 @@ export default function App(){
     syncTimer.current = setTimeout(async()=>{
       setSyncing(true);
       const ts = Date.now();
-      await apiFetch("/api/progress",{
-        method:"POST",
-        body:JSON.stringify({
-          weeklyData:weekly,topics:topicD,mernMod,dayTypes:dayT,
-          lastUpdated:new Date(ts).toISOString()
-        })
+
+      // 3rd apr replace with API.saveProgress
+      await API.saveProgress({
+        weeklyData:weekly,
+        topics:topicD,
+        mernMod,
+        dayTypes:dayT,
+        lastUpdated:new Date(ts).toISOString()
       }).catch(()=>{});
       localStorage.setItem("kk_local_ts",String(ts));
       setLastSync(new Date());setSyncing(false);
-    },2000);
-  },[token,weekly,topicD,mernMod,dayT,apiFetch]);
+      },2000);
+      },[token,weekly,topicD,mernMod,dayT]);
+
 
   useEffect(()=>{saveToBackend();},[weekly,topicD,mernMod,dayT]);
 
@@ -262,7 +272,10 @@ export default function App(){
   }
   async function syncNow(){
     if(!token)return;setSyncing(true);
-    const data = await apiFetch("/api/progress").catch(()=>null);
+
+    // 4th apr replace with API.loadProgress
+    const data = await API.loadProgress(userId).catch(()=>null);
+
     if(data?.progress){
       const remote=data.progress;
       if(remote.weeklyData) setWeekly(remote.weeklyData);

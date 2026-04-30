@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Progress = require("../models/Progress");
 
-// ✅ ADD THESE 2
+
 router.get("/", async (req, res) => {
   res.json({ progress: {} });
 });
