@@ -188,10 +188,6 @@ async function submit() {
             {mode==="login"?"Register":"Sign In"}
           </span>
         </div>
-        <div style={{textAlign:"center",marginTop:10}}>
-          <span onClick={()=>onAuth(null,null)} style={{fontSize:11,color:"#404068",cursor:"pointer",
-            textDecoration:"underline"}}>Continue offline →</span>
-        </div>
       </div>
     </div>
   );
@@ -475,7 +471,7 @@ function handleAuth(tok, email, userId) {
               </div>
             ):(
               <div>
-                <div style={{fontSize:9,color:"#f59e0b",marginBottom:4}}>⚠ offline mode</div>
+
                 <button onClick={()=>setShowAuth(true)} style={{padding:"4px 11px",borderRadius:7,
                   border:"1px solid #38bdf840",background:"#0c1a2e",color:"#38bdf8",
                   fontSize:10,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>Sign In →</button>
