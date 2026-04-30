@@ -118,8 +118,13 @@ function AuthModal({onAuth}){
       : API.register({ email, password: pass })
       );
 
-      if(!res.ok){setErr(data.message||"Error");setBusy(false);return;}
+      if (!res.ok) {
+       setErr(data.message || data.error || "Something went wrong");
+       setBusy(false);
+       return;
+      }
       onAuth(data.token, data.email);
+
     }catch{
       // Backend offline — allow offline mode
       setErr("Backend offline. Continue in offline mode.");
